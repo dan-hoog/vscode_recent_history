@@ -47,3 +47,7 @@ Send bug reports to fred_flint_33105@aol.com
 #### Key Command to mark current location (same as a select)
 #### Key command to jump to the N-th most recent few location
 #### Key command to open/close the sidebar, returning to previous sidebar if applicable
+#### Don't show full path for file names
+#### On hover over entry, show full captured text, not line number
+#### Ideally, option to add panel at bottom of file explorer, either instead or in addition...
+
