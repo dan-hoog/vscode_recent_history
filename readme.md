@@ -12,6 +12,34 @@ Developing a Visual Studio Code extension for a Recent History pane involves cre
 
 Created with care by collaboration of OpenAI DeepResearch and Hatcher Plus team including Tim Growney and Dan Hoogterp.
 
+### Making and distribution a VSIX image
+Run vsce package
+In the root of your extension project (where package.json resides), run:
+
+bash
+Copy
+vsce package
+(or npx vsce package if installed locally)
+
+vsce will bundle everything into a single .vsix file (named something like publisher-name-version.vsix) based on what’s included or excluded in your .vscodeignore.
+If you have a README.md or CHANGELOG.md, they will be included automatically.
+By default, vsce excludes node_modules except production dependencies. If you want to exclude extra files (like .git or large dev dependencies), list them in .vscodeignore.
+
+5. Install or Share the .vsix File
+You can then distribute that generated .vsix to others or install it manually:
+
+Manual Installation in VS Code:
+
+Open the Extensions view (Ctrl+Shift+X / Cmd+Shift+X).
+Click the three-dot menu (top-right) → Install from VSIX...
+Select your .vsix file.
+Reload VS Code if prompted.
+Sharing:
+
+Anyone with the .vsix can install using the same steps.
+Alternatively, you can publish to the VS Code Marketplace if you want broader distribution (requires a free Microsoft account and a “publisher” set up in the Azure DevOps Marketplace).
+
+
 Send bug reports to fred_flint_33105@aol.com
 
 
