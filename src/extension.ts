@@ -26,14 +26,14 @@ export function activate(context: vscode.ExtensionContext) {
     const maxEntriesPerFile = config.get<number>('maxEntriesPerFile', 5);
     const snippetLineCount = config.get<number>('snippetLineCount', 3);
     const preserveBetweenSessions = config.get<boolean>('preserveBetweenSessions', false);
-    
+
     let disposable = vscode.commands.registerCommand('recentHistory.helloWorld', () => {
         // The code you place here will be executed every time your command is executed
-    
+
         // Display a message box to the user
         vscode.window.showInformationMessage('Hello World!');
     });
-    
+
     context.subscriptions.push(disposable);
 
     // Extra new config:
@@ -82,23 +82,39 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('recentHistory.clearFile', (fileItem: FileHistory) => {
-            historyProvider.removeFile(fileItem.fileUri);
-            vscode.window.showInformationMessage(`Cleared history for ${fileItem.fileUri.fsPath}`);
+        vscode.commands.registerCommand('recentHistory.clearFile', (item: HistoryItem) => {
+            if (!item || !item.fileHistory) {
+                return; // safely handle unexpected calls
+            }
+            historyProvider.removeFile(item.fileHistory.fileUri);
+            vscode.window.showInformationMessage(
+                `Cleared history for ${item.fileHistory.fileUri.fsPath}`
+            );
         })
     );
 
+    context.subscriptions.push(
+        vscode.commands.registerCommand('recentHistory.openSettings', async () => {
+            // Opens the Settings UI with 'recentHistory' as the search query,
+            // at workspace scope rather than user scope.
+            await vscode.commands.executeCommand('workbench.action.openSettings', {
+                query: 'recentHistory',
+                openToSide: false,
+                target: vscode.ConfigurationTarget.Workspace
+            });
+        })
+    );
     // Listen for configuration changes (dynamic updates)
     context.subscriptions.push(
         vscode.workspace.onDidChangeConfiguration(e => {
             if (e.affectsConfiguration('recentHistory')) {
                 const cfg = vscode.workspace.getConfiguration('recentHistory');
-                historyProvider.maxFiles           = cfg.get<number>('maxFiles', 10);
-                historyProvider.maxEntriesPerFile  = cfg.get<number>('maxEntriesPerFile', 5);
-                historyProvider.snippetLineCount   = cfg.get<number>('snippetLineCount', 3);
-                historyProvider.preserve           = cfg.get<boolean>('preserveBetweenSessions', false);
-                historyProvider.maxSelectionLines  = cfg.get<number>('maxSelectionLines', 50);
-                historyProvider.areaRange          = cfg.get<number>('areaRange', 5);
+                historyProvider.maxFiles = cfg.get<number>('maxFiles', 10);
+                historyProvider.maxEntriesPerFile = cfg.get<number>('maxEntriesPerFile', 5);
+                historyProvider.snippetLineCount = cfg.get<number>('snippetLineCount', 3);
+                historyProvider.preserve = cfg.get<boolean>('preserveBetweenSessions', false);
+                historyProvider.maxSelectionLines = cfg.get<number>('maxSelectionLines', 50);
+                historyProvider.areaRange = cfg.get<number>('areaRange', 5);
             }
         })
     );
@@ -208,7 +224,7 @@ function openFileAtLine(fileUri: vscode.Uri, line: number) {
  * The TreeDataProvider for our "Recent History."
  */
 class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
-    private _onDidChangeTreeData: vscode.EventEmitter<HistoryItem | undefined | void> = 
+    private _onDidChangeTreeData: vscode.EventEmitter<HistoryItem | undefined | void> =
         new vscode.EventEmitter<HistoryItem | undefined | void>();
     readonly onDidChangeTreeData: vscode.Event<HistoryItem | undefined | void> = this._onDidChangeTreeData.event;
 
@@ -226,7 +242,7 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
             maxSelectionLines: number;
             areaRange: number;
         }
-    ) {}
+    ) { }
 
     // Getters and setters (so we can dynamically update via config changes)
     get maxFiles() { return this.opts.maxFiles; }
@@ -377,7 +393,7 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
                 // remove the oldest (by timestamp or by order). We'll remove the earliest in array here.
                 // Another approach is to sort by timestamp and pop the oldest
                 fileHist.positions.sort((a, b) => a.timestamp - b.timestamp);
-                fileHist.positions.shift(); 
+                fileHist.positions.shift();
             }
         }
 

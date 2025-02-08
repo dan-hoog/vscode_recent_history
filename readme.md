@@ -13,3 +13,9 @@ Developing a Visual Studio Code extension for a Recent History pane involves cre
 Created with care by collaboration of OpenAI DeepResearch and Hatcher Plus team including Tim Growney and Dan Hoogterp.
 
 Send bug reports to fred_flint_33105@aol.com
+
+
+## WishList
+#### Key Command to mark current location (same as a select)
+#### Key command to jump to the N-th most recent few location
+#### Key command to open/close the sidebar, returning to previous sidebar if applicable
