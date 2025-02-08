@@ -1,0 +1,45 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Run Extension",
+        // Use the Node.js-based debugger for VS Code extensions
+        "type": "pwa-extensionHost",
+        "request": "launch",
+        // Tell VS Code to use the same binary it's running on in the devcontainer
+        "runtimeExecutable": "${execPath}",
+        // Point to this folder as the extension's root
+        "args": [
+          "--extensionDevelopmentPath=${workspaceFolder}"
+        ],
+        // Where to find your compiled JavaScript (from TypeScript)
+        "outFiles": [
+          "${workspaceFolder}/out/**/*.js"
+        ],
+        // Optional: If you have a watch task to recompile TypeScript in the background
+        // "preLaunchTask": "npm: watch",
+        "stopOnEntry": false,
+        // (Optional) show debug output right away
+        "internalConsoleOptions": "openOnSessionStart"
+      },
+      {
+        "name": "Extension Tests",
+        "type": "pwa-extensionHost",
+        "request": "launch",
+        "runtimeExecutable": "${execPath}",
+        // Pass both extensionDevelopmentPath and extensionTestsPath
+        "args": [
+          "--extensionDevelopmentPath=${workspaceFolder}",
+          "--extensionTestsPath=${workspaceFolder}/out/test"
+        ],
+        "outFiles": [
+          "${workspaceFolder}/out/test/**/*.js",
+          "${workspaceFolder}/out/**/*.js"
+        ],
+        // "preLaunchTask": "npm: watch",
+        "stopOnEntry": false,
+        "internalConsoleOptions": "openOnSessionStart"
+      }
+    ]
+  }
+  

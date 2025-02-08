@@ -1,0 +1,43 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.195.0/containers/php
+{
+	"name": "HatcherScore",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+		
+	// Configure tool-specific properties.
+	"customizations": {
+	},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [],
+
+	// Use 'portsAttributes' to set default properties for specific forwarded ports. More info: https://code.visualstudio.com/docs/remote/devcontainerjson-reference.
+	"portsAttributes": {
+	},
+
+	// Use 'otherPortsAttributes' to configure any ports that aren't configured using 'portsAttributes'.
+	// "otherPortsAttributes": {
+	// 		"onAutoForward": "silent"
+	// },
+
+	// A whole bunch of commands need to run after the Docker container is built:
+	// - Run a composer install on the project
+	// - Run migrations
+	// - Run seeders
+	// - Create the php-fpm socket directory (can't seem to do it itself)
+	// - Installs NodeJS and runs an npm install
+	// - Generates dev CSS
+	// - Generates dev js files
+	// - Creates the storage/app/purify directory (otherwise it blows up?)
+	// - Links the resources/lang-local directory to resources/lang
+	//    -- Currently, there is a shared language drive out on the cloud which will conflict with this
+	//       if we were to just check languages in under lang.  So we can just link them for now instead.
+
+	// "postCreateCommand": "",
+	// "postStartCommand": "nohup bash -c 'unoserver --daemon &'",
+	
+	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	"remoteUser": "ubuntu"
+}

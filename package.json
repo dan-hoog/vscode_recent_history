@@ -1,0 +1,123 @@
+{
+    "name": "recent-history",
+    "displayName": "Recent History",
+    "description": "A VS Code extension that shows a sidebar of recently edited or selected text areas.",
+    "version": "0.1.1",
+    "publisher": "Hatcher+",
+    "engines": {
+      "vscode": "^1.70.0" 
+    },
+    "categories": [
+      "Other"
+    ],
+    "activationEvents": [
+      "onDidChangeTextEditorSelection",
+      "onDidChangeTextDocument",
+      "onView:recentHistory",
+      "onCommand:recentHistory.clearFile",
+      "onCommand:recentHistory.clearAll",
+      "onCommand:recentHistory.revealLine"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+      "viewsContainers": {
+        "activitybar": [
+          {
+            "id": "recentHistoryViewContainer",
+            "title": "History",
+            "icon": "resources/history.svg"
+          }
+        ]
+      },
+      "views": {
+        "recentHistoryViewContainer": [
+          {
+            "id": "recentHistory",
+            "name": "Recent History"
+          }
+        ]
+      },
+      "commands": [
+        {
+          "command": "recentHistory.revealLine",
+          "title": "RecentHistory: Open File and Reveal Line"
+        },
+        {
+          "command": "recentHistory.clearAll",
+          "title": "RecentHistory: Clear All Recent History"
+        },
+        {
+          "command": "recentHistory.clearFile",
+          "title": "RecentHistory: Clear File From Recent History"
+        },
+        {
+          "command": "recentHistory.helloWorld",
+          "title": "RecentHistory: Give me a Hello World!"
+        }
+      ],
+      "menus": {
+        "view/title": [
+          {
+            "command": "recentHistory.clearAll",
+            "when": "view == recentHistory",
+            "group": "navigation"
+          }
+        ],
+        "view/item/context": [
+          {
+            "command": "recentHistory.clearFile",
+            "when": "view == recentHistory && viewItem == fileItem",
+            "group": "inline",
+            "icon": "resources/remove_dash.svg"
+          }
+        ]
+      },
+      "configuration": {
+        "type": "object",
+        "title": "Recent History Settings",
+        "properties": {
+          "recentHistory.maxFiles": {
+            "type": "number",
+            "default": 10,
+            "description": "Maximum number of recent files to track."
+          },
+          "recentHistory.maxEntriesPerFile": {
+            "type": "number",
+            "default": 5,
+            "description": "Maximum history entries (cursor positions/areas) per file."
+          },
+          "recentHistory.snippetLineCount": {
+            "type": "number",
+            "default": 3,
+            "description": "Number of lines to show in the snippet preview (centered around earliest line of the captured area)."
+          },
+          "recentHistory.preserveBetweenSessions": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, history is saved between VS Code sessions."
+          },
+          "recentHistory.maxSelectionLines": {
+            "type": "number",
+            "default": 50,
+            "description": "Suppress capturing if the selection or edit range spans more than this many lines."
+          },
+          "recentHistory.areaRange": {
+            "type": "number",
+            "default": 5,
+            "description": "Treat new selections/edits as the same 'area' if they fall within this many lines of an existing history entry."
+          }
+        }
+      }
+    },
+    "scripts": {
+      "compile": "tsc -p ./",
+      "watch": "tsc -w -p ./"
+    },
+    "devDependencies": {
+      "@types/vscode": "^1.70.0",
+      "@types/node": "^16.0.0",
+      "typescript": "^4.0.0",
+      "vsce": "^2.9.0"
+    }
+  }
+  
