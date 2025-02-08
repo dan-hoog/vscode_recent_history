@@ -1,3 +1,6 @@
+### Build Process Information from chatgpt
+See https://chatgpt.com/share/67a753a7-a03c-8000-a90a-af4d9f6bc697
+
 # Overview
 Developing a Visual Studio Code extension for a Recent History pane involves creating a custom sidebar view that tracks the files and cursor locations you’ve recently changed or interacted with by selecting text. The goal is to provide quick navigation to recently accessed parts of your code, using the select action as a signal if an important area was visited without changes. This extension presents a list of recently used files (most recent first), each with a few recent cursor positions (with line numbers and code snippets) under them. By clicking entries in this history list, developers can instantly jump back to those files and lines. The interface will be minimalist and consistent with VS Code’s look and feel, using the native Tree View API for integration into the sidebar (Tree View API | Visual Studio Code Extension API). Key considerations include making the feature configurable (how many files/entries to track) and ensuring it runs efficiently without slowing down the editor.
 ## Key Features
