@@ -265,7 +265,7 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
                     file,
                     undefined,
                     label,
-                    vscode.TreeItemCollapsibleState.Collapsed,
+                    vscode.TreeItemCollapsibleState.Expanded,
                     'fileItem'
                 );
             });

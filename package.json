@@ -44,11 +44,19 @@
         },
         {
           "command": "recentHistory.clearAll",
-          "title": "RecentHistory: Clear All Recent History"
+          "title": "Clear All",
+          "icon": {
+            "light": "resources/minus-light-mode.svg",
+            "dark": "resources/minus-dark-mode.svg"
+          }
         },
         {
           "command": "recentHistory.clearFile",
-          "title": "RecentHistory: Clear File From Recent History"
+          "title": "Delete",
+          "icon": {
+            "light": "resources/minus-light-mode.svg",
+            "dark": "resources/minus-dark-mode.svg"
+          }
         },
         {
           "command": "recentHistory.helloWorld",
@@ -67,8 +75,7 @@
           {
             "command": "recentHistory.clearFile",
             "when": "view == recentHistory && viewItem == fileItem",
-            "group": "inline",
-            "icon": "resources/remove_dash.svg"
+            "group": "inline"
           }
         ]
       },
@@ -98,7 +105,7 @@
           },
           "recentHistory.maxSelectionLines": {
             "type": "number",
-            "default": 50,
+            "default": 25,
             "description": "Suppress capturing if the selection or edit range spans more than this many lines."
           },
           "recentHistory.areaRange": {
