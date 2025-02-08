@@ -59,14 +59,23 @@
           }
         },
         {
-          "command": "recentHistory.helloWorld",
-          "title": "RecentHistory: Give me a Hello World!"
+          "command": "recentHistory.openSettings",
+          "title": "RecentHistory: Open Settings",
+          "icon": {
+            "light": "resources/gear-light-mode.svg",
+            "dark": "resources/gear-dark-mode.svg"
+          }
         }
       ],
       "menus": {
         "view/title": [
           {
             "command": "recentHistory.clearAll",
+            "when": "view == recentHistory",
+            "group": "navigation"
+          },
+          {
+            "command": "recentHistory.openSettings",
             "when": "view == recentHistory",
             "group": "navigation"
           }
