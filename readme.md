@@ -43,6 +43,9 @@ Sharing:
 Anyone with the .vsix can install using the same steps.
 Alternatively, you can publish to the VS Code Marketplace if you want broader distribution (requires a free Microsoft account and a “publisher” set up in the Azure DevOps Marketplace).
 
+## Latest .vsix
+* Included in distribution, easily installed with add extension from .vsix option!
+
 ## Send us bug reports or comments
 
 
