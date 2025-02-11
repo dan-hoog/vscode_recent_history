@@ -17,6 +17,10 @@ See https://chatgpt.com/share/67a753a7-a03c-8000-a90a-af4d9f6bc697
 Created with care by collaboration of OpenAI DeepResearch and Hatcher Plus team including Tim Growney and Dan Hoogterp.
 
 ## Making and distribution a VSIX image
+Ensure the .js is complied with
+npm run compile
+
+Then build the VSXI with
 Run vsce package
 In the root of your extension project (where package.json resides), run:
 

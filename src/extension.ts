@@ -21,6 +21,7 @@ interface FileHistory {
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Recent History extension is now active!');
+
     const config = vscode.workspace.getConfiguration('recentHistory');
     const maxFiles = config.get<number>('maxFiles', 10);
     const maxEntriesPerFile = config.get<number>('maxEntriesPerFile', 5);
@@ -28,19 +29,15 @@ export function activate(context: vscode.ExtensionContext) {
     const preserveBetweenSessions = config.get<boolean>('preserveBetweenSessions', false);
 
     let disposable = vscode.commands.registerCommand('recentHistory.helloWorld', () => {
-        // The code you place here will be executed every time your command is executed
-
-        // Display a message box to the user
         vscode.window.showInformationMessage('Hello World!');
     });
-
     context.subscriptions.push(disposable);
 
-    // Extra new config:
+    // Additional config
     const maxSelectionLines = config.get<number>('maxSelectionLines', 50);
     const areaRange = config.get<number>('areaRange', 5);
 
-    // Load from globalState if preserveBetweenSessions is true
+    // Load from globalState if preserving between sessions
     let globalHistory: FileHistory[] = [];
     if (preserveBetweenSessions) {
         const saved = context.globalState.get<FileHistory[]>('recentHistoryData');
@@ -95,8 +92,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('recentHistory.openSettings', async () => {
-            // Opens the Settings UI with 'recentHistory' as the search query,
-            // at workspace scope rather than user scope.
+            // Opens the Settings UI with 'recentHistory' as the search query
             await vscode.commands.executeCommand('workbench.action.openSettings', {
                 query: 'recentHistory',
                 openToSide: false,
@@ -104,6 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
             });
         })
     );
+
     // Listen for configuration changes (dynamic updates)
     context.subscriptions.push(
         vscode.workspace.onDidChangeConfiguration(e => {
@@ -119,11 +116,7 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
-    // ─────────────────────────────────────────────────────────────
-    // 1) Capture only if there's a NON-EMPTY selection in the editor:
-    //    If the user selects text (range > 0 lines), record the earliest line in that selection,
-    //    unless it's bigger than maxSelectionLines.
-    // ─────────────────────────────────────────────────────────────
+    // Capture selection events
     context.subscriptions.push(
         vscode.window.onDidChangeTextEditorSelection(event => {
             const editor = event.textEditor;
@@ -136,54 +129,41 @@ export function activate(context: vscode.ExtensionContext) {
             // We'll just track the primary selection
             const selection = event.selections[0];
             if (selection.isEmpty) {
-                // user only moved the cursor with no selection => skip
-                return;
+                return; // cursor move with no selection => skip
             }
-
             const lineDiff = Math.abs(selection.end.line - selection.start.line);
             if (lineDiff > historyProvider.maxSelectionLines) {
-                // The selection is too large => skip
-                return;
+                return; // skip large selections
             }
 
-            // The "earliest" line is the top of the selection
             const earliestLine = Math.min(selection.start.line, selection.end.line);
-
             historyProvider.recordSelectionOrEdit(
                 editor.document.uri,
                 earliestLine,
-                false // not specifically an edit, but a selection
+                false // not an edit, just a selection
             );
         })
     );
 
-    // ─────────────────────────────────────────────────────────────
-    // 2) Capture if a text edit occurs:
-    //    We'll look at the changed ranges. If the total lines changed
-    //    is more than maxSelectionLines, skip. Otherwise record earliest line.
-    // ─────────────────────────────────────────────────────────────
+    // Capture text edits
     context.subscriptions.push(
         vscode.workspace.onDidChangeTextDocument(event => {
             if (event.contentChanges.length === 0) {
                 return;
             }
             const docUri = event.document.uri;
-
             // For simplicity, just look at the first change's range
-            // (or you could record multiple if you prefer).
             const change = event.contentChanges[0];
             const linesChanged = Math.abs(change.range.end.line - change.range.start.line);
-
             if (linesChanged > historyProvider.maxSelectionLines) {
-                return; // skip big multi-line edits
+                return; // skip big edits
             }
-
             const earliestLine = Math.min(change.range.start.line, change.range.end.line);
 
             historyProvider.recordSelectionOrEdit(
                 docUri,
                 earliestLine,
-                true // isEdit
+                true // is an edit
             );
         })
     );
@@ -193,7 +173,7 @@ export function activate(context: vscode.ExtensionContext) {
         const saveFn = () => {
             context.globalState.update('recentHistoryData', historyProvider.getHistory());
         };
-        // Save when a doc is saved or closed
+        // Save on doc save/close or internal data change
         context.subscriptions.push(
             vscode.workspace.onDidSaveTextDocument(saveFn),
             vscode.workspace.onDidCloseTextDocument(saveFn),
@@ -221,6 +201,22 @@ function openFileAtLine(fileUri: vscode.Uri, line: number) {
 }
 
 /**
+ * A small helper function that returns the lowest-level directory plus file name.
+ * Example: /home/user/project/src/foo.ts => "src/foo.ts"
+ */
+// CHANGE: Helper for short label
+function getShortFileName(fullPath: string): string {
+    const parts = fullPath.split(/[\\/]/);
+    if (parts.length < 2) {
+        return fullPath; // Fallback if we can't split
+    } else {
+        const parent = parts[parts.length - 2];
+        const file = parts[parts.length - 1];
+        return parent + '/' + file;
+    }
+}
+
+/**
  * The TreeDataProvider for our "Recent History."
  */
 class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
@@ -244,7 +240,7 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
         }
     ) { }
 
-    // Getters and setters (so we can dynamically update via config changes)
+    // Getters/setters for dynamic config
     get maxFiles() { return this.opts.maxFiles; }
     set maxFiles(v: number) { this.opts.maxFiles = v; }
 
@@ -263,20 +259,23 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
     get areaRange() { return this.opts.areaRange; }
     set areaRange(v: number) { this.opts.areaRange = v; }
 
-    // TreeDataProvider interface
+    // ─────────────────────────────────────────────────────────────
+    // TreeDataProvider methods
+    // ─────────────────────────────────────────────────────────────
     getTreeItem(element: HistoryItem): vscode.TreeItem {
         return element;
     }
 
     async getChildren(element?: HistoryItem): Promise<HistoryItem[]> {
         if (!element) {
-            // top-level => file items
+            // Top-level => file items
             const sortedFiles = this.history
                 .slice()
                 .sort((a, b) => b.lastAccessed - a.lastAccessed);
 
             return sortedFiles.map(file => {
-                const label = file.fileUri.fsPath;
+                // CHANGE: show only last directory and filename
+                const label = getShortFileName(file.fileUri.fsPath);
                 return new HistoryItem(
                     file,
                     undefined,
@@ -286,7 +285,7 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
                 );
             });
         } else {
-            // second level => positions in a file
+            // Second level => positions in a file
             if (element.fileHistory) {
                 const file = element.fileHistory;
                 const sortedPositions = file.positions
@@ -294,27 +293,30 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
                     .sort((a, b) => b.timestamp - a.timestamp);
 
                 return sortedPositions.map(pos => {
+                    // Keep "Line X" in the label, but remove line number from hover
                     const label = `Line ${pos.line + 1}`;
-                    const snippetPreview = pos.snippet.replace(/\r?\n/g, '⏎');
 
-                    let icon = pos.isEdited
-                        ? new vscode.ThemeIcon('circle-filled', new vscode.ThemeColor('charts.red'))
-                        : new vscode.ThemeIcon('circle-outline', new vscode.ThemeColor('charts.foreground'));
-
-                    return new HistoryItem(
+                    // CHANGE: Use pos.snippet as tooltip, remove from description
+                    const item = new HistoryItem(
                         file,
                         pos,
                         label,
                         vscode.TreeItemCollapsibleState.None,
                         'positionItem',
-                        icon,
+                        // icon (red vs. green)
+                        pos.isEdited
+                            ? new vscode.ThemeIcon('circle-filled', new vscode.ThemeColor('charts.red'))
+                            : new vscode.ThemeIcon('circle-outline', new vscode.ThemeColor('charts.foreground')),
                         {
                             command: 'recentHistory.revealLine',
                             title: 'Reveal Line',
                             arguments: [file.fileUri, pos.line]
-                        },
-                        snippetPreview
+                        }
                     );
+
+                    // CHANGE: full text snippet in the tooltip
+                    item.tooltip = pos.snippet;
+                    return item;
                 });
             }
             return [];
@@ -356,9 +358,6 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
      * We'll:
      *  1) Find or create the file in history
      *  2) Attempt to find an existing position "in the same area" (within `areaRange` lines)
-     *     - If found, keep that earliest line if it's < the current line
-     *       and update the timestamp = now, isEdited if appropriate
-     *     - If not found, create a new entry
      *  3) Move the file to top of recency
      *  4) Refresh the view
      */
@@ -366,17 +365,15 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
         const fileHist = this.getOrCreateFileHistory(uri);
         const now = Date.now();
 
-        // find if there's an existing position within areaRange lines of baseLine
-        const areaPos = fileHist.positions.find(p => Math.abs(p.line - baseLine) <= this.areaRange);
+        // find if there's an existing position within areaRange lines
+        const areaPos = fileHist.positions.find(p => Math.abs(p.line - baseLine) <= this.opts.areaRange);
         if (areaPos) {
-            // Reuse the same position. Keep the earliest line if it is smaller.
-            // (If you prefer always using the new line, you could do the opposite.)
+            // Reuse the same position
             areaPos.line = Math.min(areaPos.line, baseLine);
-            // Rebuild snippet for that earliest line:
+            // Rebuild snippet for earliest line
             areaPos.snippet = this.buildSnippet(uri, areaPos.line, this.snippetLineCount);
-            // Update isEdited if the new activity was an edit
+            // Mark edited if we have a new edit
             areaPos.isEdited = areaPos.isEdited || isEdit;
-            // Update recency
             areaPos.timestamp = now;
         } else {
             // create new position
@@ -390,8 +387,7 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
 
             // Enforce max entries
             if (fileHist.positions.length > this.maxEntriesPerFile) {
-                // remove the oldest (by timestamp or by order). We'll remove the earliest in array here.
-                // Another approach is to sort by timestamp and pop the oldest
+                // remove the oldest by timestamp
                 fileHist.positions.sort((a, b) => a.timestamp - b.timestamp);
                 fileHist.positions.shift();
             }
@@ -401,9 +397,7 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
         fileHist.lastAccessed = now;
 
         // Move file to front
-        // 1) remove existing
         this.history = this.history.filter(h => h.fileUri.toString() !== uri.toString());
-        // 2) re-insert at front
         this.history.unshift(fileHist);
 
         // Enforce max files
@@ -443,12 +437,10 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
         if (!doc) {
             return `... (file not open) ...`;
         }
-
         if (doc.lineCount === 0) {
             return '';
         }
 
-        // We want lineCount lines total around "line"
         const half = Math.floor(lineCount / 2);
         let startLine = line - half;
         let endLine = startLine + (lineCount - 1);
@@ -481,12 +473,9 @@ class HistoryItem extends vscode.TreeItem {
         collapsibleState?: vscode.TreeItemCollapsibleState,
         public readonly contextValue?: string,
         iconPath?: vscode.ThemeIcon,
-        command?: vscode.Command,
-        description?: string
+        command?: vscode.Command
     ) {
         super(label || '', collapsibleState);
-
-        this.description = description;
         if (iconPath) {
             this.iconPath = iconPath;
         }
