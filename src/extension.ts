@@ -204,7 +204,6 @@ function openFileAtLine(fileUri: vscode.Uri, line: number) {
  * A small helper function that returns the lowest-level directory plus file name.
  * Example: /home/user/project/src/foo.ts => "src/foo.ts"
  */
-// CHANGE: Helper for short label
 function getShortFileName(fullPath: string): string {
     const parts = fullPath.split(/[\\/]/);
     if (parts.length < 2) {
@@ -274,7 +273,6 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
                 .sort((a, b) => b.lastAccessed - a.lastAccessed);
 
             return sortedFiles.map(file => {
-                // CHANGE: show only last directory and filename
                 const label = getShortFileName(file.fileUri.fsPath);
                 return new HistoryItem(
                     file,
@@ -293,10 +291,11 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
                     .sort((a, b) => b.timestamp - a.timestamp);
 
                 return sortedPositions.map(pos => {
-                    // Keep "Line X" in the label, but remove line number from hover
-                    const label = `Line ${pos.line + 1}`;
+                    // Create a single-line version of the snippet (replacing newlines with spaces).
+                    const singleLineSnippet = pos.snippet.replace(/\r?\n/g, ' ');
+                    // Show line number + snippet in the label
+                    const label = `Line ${pos.line + 1}: ${singleLineSnippet}`;
 
-                    // CHANGE: Use pos.snippet as tooltip, remove from description
                     const item = new HistoryItem(
                         file,
                         pos,
@@ -314,8 +313,9 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
                         }
                     );
 
-                    // CHANGE: full text snippet in the tooltip
+                    // Keep the full multiline snippet in tooltip:
                     item.tooltip = pos.snippet;
+
                     return item;
                 });
             }
