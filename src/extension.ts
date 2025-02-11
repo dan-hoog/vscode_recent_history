@@ -292,7 +292,7 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
 
                 return sortedPositions.map(pos => {
                     // Create a single-line version of the snippet (replacing newlines with spaces).
-                    const singleLineSnippet = pos.snippet.replace(/\r?\n/g, ' ');
+                    const singleLineSnippet = pos.snippet.replace(/\r?\n/g, '⏎');
                     // Show line number + snippet in the label
                     const label = `Line ${pos.line + 1}: ${singleLineSnippet}`;
 
@@ -456,7 +456,7 @@ class RecentHistoryProvider implements vscode.TreeDataProvider<HistoryItem> {
 
         const snippetLines: string[] = [];
         for (let i = startLine; i <= endLine; i++) {
-            snippetLines.push(doc.lineAt(i).text);
+            snippetLines.push(doc.lineAt(i).text.trim());
         }
         return snippetLines.join('\n');
     }
